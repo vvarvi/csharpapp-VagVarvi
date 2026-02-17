@@ -14,7 +14,7 @@ public class ProductsService : IProductsService
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<Product>> GetProducts()
+    public async Task<IReadOnlyCollection<Product>> GetProducts(CancellationToken cancellationToken)
     {
         _httpClient.BaseAddress = new Uri(_restApiSettings.BaseUrl!);
         var response = await _httpClient.GetAsync(_restApiSettings.Products);

@@ -2,16 +2,20 @@ namespace CSharpApp.Infrastructure.Configuration;
 
 public static class DefaultConfiguration
 {
-    public static IServiceCollection AddDefaultConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddDefaultConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var configuration = serviceProvider.GetService<IConfiguration>();
+        services.Configure<RestApiSettings>(configuration.GetSection(nameof(RestApiSettings)));
 
-        services.Configure<RestApiSettings>(configuration!.GetSection(nameof(RestApiSettings)));
         services.Configure<HttpClientSettings>(configuration.GetSection(nameof(HttpClientSettings)));
 
-        services.AddSingleton<IProductsService, ProductsService>();
-        
+        services.Configure<PerformanceSettings>(configuration.GetSection(nameof(PerformanceSettings)));
+
+        //Validate PerformanceSettings -> SlowRequestThresholdMs
+        services.AddOptions<PerformanceSettings>()
+                .Bind(configuration.GetSection(nameof(PerformanceSettings)))
+                .Validate(s => s.SlowRequestThresholdMs > 0, "SlowRequestThresholdMs must be greater than 0")
+                .ValidateOnStart();
+
         return services;
     }
 }

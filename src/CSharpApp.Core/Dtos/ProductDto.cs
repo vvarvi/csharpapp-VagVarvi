@@ -1,6 +1,6 @@
 namespace CSharpApp.Core.Dtos;
 
-public sealed class Product
+public sealed class ProductDto
 {
     [JsonPropertyName("id")]
     public int? Id { get; set; }
@@ -24,5 +24,5 @@ public sealed class Product
     public DateTime? UpdatedAt { get; set; }
 
     [JsonPropertyName("category")]
-    public Category? Category { get; set; }
+    public CategoryDto? Category { get; set; }
 }

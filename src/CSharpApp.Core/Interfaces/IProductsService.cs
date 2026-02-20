@@ -1,6 +1,15 @@
-namespace CSharpApp.Core.Interfaces;
+using CSharpApp.Core.Commands.DTO;
+using CSharpApp.Core.Common;
+using CSharpApp.Core.Entities;
 
-public interface IProductsService
+namespace CSharpApp.Core.Interfaces
 {
-    Task<IReadOnlyCollection<Product>> GetProducts(CancellationToken cancellationToken);
+    public interface IProductsService
+    {
+        Task<Result<IReadOnlyCollection<Product>>> GetProducts(CancellationToken cancellationToken);
+
+        Task<Product> GetProductById(int id);
+
+        Task<Product> CreateProduct(CreateProductRequest request);
+    }
 }

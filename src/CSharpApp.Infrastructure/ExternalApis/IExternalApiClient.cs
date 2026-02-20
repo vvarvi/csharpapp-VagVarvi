@@ -1,4 +1,5 @@
 ﻿using CSharpApp.Core.Dtos;
+using CSharpApp.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

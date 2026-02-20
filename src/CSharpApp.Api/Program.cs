@@ -59,16 +59,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<PerformanceLoggingMiddleware>();
-
+ 
 var versionedEndpointRouteBuilder = app.NewVersionedApi();
-
-versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/token-test", async (IAuthService authService) =>
-    {
-        var token = await authService.LoginAsync();
-        return token;
-    })
-.HasApiVersion(1.0);
-
 
 versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/getproducts", async (IMediator mediator) =>
 {
@@ -87,10 +79,10 @@ versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/getproducts", as
 .HasApiVersion(1.0);
 
 versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/products/{id}", async (int id, IMediator mediator) =>
-    {
-        return await mediator.Send(new GetProductByIdQuery(id));
-    })
-    .HasApiVersion(1.0);
+{
+    return await mediator.Send(new GetProductByIdQuery(id));
+})
+.HasApiVersion(1.0);
 
 versionedEndpointRouteBuilder.MapPost("api/v{version:apiVersion}/products", async (CreateProductCommand command, IMediator mediator) =>
     {
@@ -142,6 +134,13 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
         await context.Response.WriteAsync(result);
     }
 });
+
+versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/token-test", async (IAuthService authService) =>
+{
+    var token = await authService.LoginAsync();
+    return token;
+})
+.HasApiVersion(1.0);
 
 //app.MapControllers();
 

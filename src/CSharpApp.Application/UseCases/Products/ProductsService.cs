@@ -64,12 +64,9 @@ public class ProductsService : IProductsService
 
         if (!response.IsSuccessStatusCode)
         {
-            if (!response.IsSuccessStatusCode)
-            {
-                var message = await response.Content.ReadAsStringAsync();
+            var message = await response.Content.ReadAsStringAsync();
 
-                throw new ExternalApiException((int)response.StatusCode, message);
-            }
+            throw new ExternalApiException((int)response.StatusCode, message);
         }
 
         var contentString = await response.Content.ReadAsStringAsync();
@@ -78,10 +75,10 @@ public class ProductsService : IProductsService
 
         return new Product
         {
-            Id = product?.Id,
-            Title = product.Title,
-            Price = product.Price,
-            Description = product.Description
+            Title = request.Title,
+            Price = request.Price,
+            Description = request.Description,
+            Category = new Category { Id = request.CategoryId }
         };
     }
 }

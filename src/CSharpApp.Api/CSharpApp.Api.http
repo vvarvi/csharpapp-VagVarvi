@@ -4,4 +4,33 @@
 GET {{HostAddress}}/api/{{Version}}/getproducts
 Accept: application/json
 
+
+GET {{HostAddress}}/api/{{Version}}/products/1
+Accept: application/json
+
+POST {{HostAddress}}/api/{{Version}}/products
+Content-Type: application/json
+{
+    "title": "New Product",
+    "price": 10,
+    "description": "A description",
+    "categoryId": 1,
+    "images": [
+        "https://placeimg.com/640/480/any"
+    ]
+}
+
+GET {{HostAddress}}/api/{{Version}}/getcategories
+Accept: application/json
+
+GET {{HostAddress}}/api/{{Version}}/categories/6
+Accept: application/json
+
+POST {{HostAddress}}/api/{{Version}}/categories
+Content-Type: application/json
+{
+  "name": "Books",
+  "image": "https://api.lorem.space/image/book?w=150&h=220"
+}
+
 ###

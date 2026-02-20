@@ -1,43 +1,190 @@
-# C# Accepted Assessment app
+# CSharpApp
 
-An application for C# (.net) knowledge assessment
+Production-ready .NET 10 Web API implementing Clean Architecture, CQRS, functional error handling, resilient external API integration, JWT lifecycle management, observability, testing, and Docker support.
 
-## Description
+## Overview
 
-This is a web application that interacts with a 3nd party service (<https://fakeapi.platzi.com>/<https://api.escuelajs.co>) and serves data
+CSharpApp is a versioned REST API built with .NET 10 that integrates with an external REST service. The project demonstrates production-grade backend engineering practices including:
+•	Clean Architecture
+•	CQRS with MediatR
+•	Functional error handling (Result)
+•	Typed HttpClient
+•	JWT authentication (access + refresh flow)
+•	Polly retry policies
+•	Structured logging (Serilog)
+•	Health checks (liveness & readiness)
+•	Docker multi-stage build
+•	Unit & Integration testing
 
-We have to do some code refactoring and implement some new features
+## Architecture
 
-## Code refactoring
+The solution follows Clean Architecture principles with strict separation of concerns.
+Project Structure
+CSharpApp.Api            → Presentation (Minimal API)
+CSharpApp.Application    → Use cases (CQRS, handlers, interfaces)
+CSharpApp.Infrastructure → External integrations, HttpClient, Auth
+CSharpApp.Core           → Domain entities & shared abstractions
+CSharpApp.Tests          → Unit & Integration tests
 
-Seems that the use of http client is not so much efficient
+Flow
 
-Let's make a different, more solid, approach/implementation
+HTTP Request
+   ↓
+Minimal API Endpoint
+   ↓
+MediatR Query
+   ↓
+Handler
+   ↓
+Service (Typed HttpClient)
+   ↓
+External API
 
-## New features
+## Authentication Flow
 
-**#1**
+The external API requires JWT authentication.
+Implemented lifecycle:
 
-Right now only the **getAll** method supported for **products**
+1.	Login → retrieve access_token & refresh_token
+2.	Parse JWT exp claim
+3.	Apply expiration buffer
+4.	Automatic refresh when expired
+5.	Token injection via DelegatingHandler
 
-We have to implement **getOne** and **create** methods also
+Features:
 
-**#2**
+•	Thread-safe token refresh
+•	No token exposure in logs
+•	Automatic handling per request
 
-Add implementation for **categories**
+## Resilience Strategy
 
-**#3**
+Polly is used for resilience:
+•	Configurable retry count
+•	Configurable backoff
+•	Applied to outbound HTTP calls
+HTTP pipeline order:
+LoggingHandler
+   ↓
+AuthDelegatingHandler
+   ↓
+Polly Retry Policy
+   ↓
+External API
 
-3nd party service supports JWT auth. We have to implement and support it. Use the credentials provided to appsettings.json file.
+ 
+## Error Handling
 
-**#4**
+The project avoids exception-driven flow for business logic.
+Instead, it uses a functional Result pattern:
 
-We must measure and log the performance of the requests. Create a middleware to achieve this.
+•	Success → returns value
+•	Failure → returns Error (Code, Message, StatusCode)
 
-## Implementation
+Endpoints map Result to proper HTTP responses using ProblemDetails.
 
-* Try to understand and keep the architectural approach.
-* Add unit testing.
-* Add docker support.
-* Using CQRS pattern will be considered as a strong plus.
-* The attached collections (postman/insomnia) will help you with the requests.
+This ensures:
+
+•	Predictable behavior
+•	Clear control flow
+•	Easier testing
+
+## Observability
+
+Structured logging with Serilog:
+
+•	Console logging
+•	File logging
+•	Slow request threshold (configurable)
+•	Outbound HTTP logging
+
+Performance settings are strongly typed via configuration.
+
+## Health Checks
+
+Endpoints:
+
+GET /health/live
+GET /health/ready
+
+Readiness check validates external API connectivity.
+Docker HEALTHCHECK is configured for container orchestration readiness.
+
+## Testing
+
+Unit Tests
+•	Handlers
+•	TokenProvider
+•	Middleware
+
+Integration Tests
+•	CustomWebApplicationFactory
+•	Fake service overrides
+•	Full pipeline verification
+
+Docker Support
+Multi-stage Docker build is implemented.
+Build
+docker build -t csharpapp .
+Run
+docker run -p 8080:8080 csharpapp
+API will be available at:
+http://localhost:8080
+
+## Configuration
+
+Strongly-typed configuration objects:
+•	RestApiSettings
+•	HttpClientSettings
+•	JwtOptions
+•	PerformanceSettings
+
+Configured via appsettings.json and injected using IOptions.
+
+## API Endpoints
+
+Products
+
+/api/v1/products
+
+GET getAll
+GET getOne
+POST create
+
+Categories 
+
+/api/v1/categories
+
+GET getAll
+GET getOne
+POST create
+
+Health
+GET /health/live
+GET /health/ready
+
+## Production-Ready Features
+
+•	API Versioning
+•	Clean Architecture
+•	CQRS
+•	Functional error handling
+•	JWT auto-refresh
+•	Resilient HttpClient
+•	Structured logging
+•	Health checks
+•	Docker support
+•	Unit & Integration testing
+
+## Future Improvements Suggestions
+
+•	Circuit breaker policy
+•	OpenTelemetry distributed tracing
+•	Caching layer
+•	Rate limiting
+•	Metrics endpoint (Prometheus)
+•	Kubernetes deployment manifests
+
+## Author
+
+Backend engineering assessment project demonstrating senior-level architecture, resilience, and clean design principles.

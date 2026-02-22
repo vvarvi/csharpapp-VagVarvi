@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using CSharpApp.Core.Common;
+using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace CSharpApp.Infrastructure.Auth
@@ -19,7 +21,7 @@ namespace CSharpApp.Infrastructure.Auth
             _settings = settings.Value;
         }
 
-        public async Task<AuthTokenResponse> LoginAsync()
+        public async Task<Result<AuthTokenResponse>> LoginAsync()
         {
             var payload = new
             {
@@ -31,13 +33,36 @@ namespace CSharpApp.Infrastructure.Auth
                 _settings.Auth,
                 payload);
 
-            response.EnsureSuccessStatusCode();
+            //response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<AuthTokenResponse>()
-                   ?? throw new Exception("Auth failed");
+            //return await response.Content.ReadFromJsonAsync<AuthTokenResponse>()
+            //       ?? throw new InvalidOperationException("Auth failed");
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Error error = new Error("401", "Unauthorized: Invalid refresh token", 401);
+                return Result<AuthTokenResponse>.Failure(error);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Error error = new Error("Code 002", "Is NOT Success Status Code: Authentication service error", 002);
+                return Result<AuthTokenResponse>.Failure(error);
+            }
+
+            var token = await response.Content.ReadFromJsonAsync<AuthTokenResponse>();
+
+            if (token == null)
+            {
+                Error error = new Error("Code 001", "Token is NULL", 001);
+
+                return Result<AuthTokenResponse>.Failure(error);
+            }
+
+            return Result<AuthTokenResponse>.Success(token);
         }
 
-        public async Task<AuthTokenResponse> RefreshAsync(string refreshToken)
+        public async Task<Result<AuthTokenResponse>> RefreshAsync(string refreshToken)
         {
             var payload = new { refreshToken };
 
@@ -45,10 +70,40 @@ namespace CSharpApp.Infrastructure.Auth
                 _settings.Refresh,
                 payload);
 
+            /*  Custom handling for 401 error response
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                throw new UnauthorizedAccessException("Invalid refresh token");
+            */
+
+            /*  Explicit - Fail-fast - Production - safe Null-safe    
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<AuthTokenResponse>()
-                   ?? throw new Exception("Refresh token failed");
+                            ?? throw new InvalidOperationException("Refresh Token response was null.");
+            */
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Error error = new Error("401", "Unauthorized: Invalid refresh token", 401);
+                return Result<AuthTokenResponse>.Failure(error);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Error error = new Error("Code 002", "Is NOT Success Status Code: Authentication service error", 002);
+                return Result<AuthTokenResponse>.Failure(error);
+            }
+
+            var token = await response.Content.ReadFromJsonAsync<AuthTokenResponse>();
+
+            if (token == null)
+            {
+                Error error = new Error("Code 001", "Token is NULL", 001);
+
+                return Result<AuthTokenResponse>.Failure(error);
+            }
+
+            return Result<AuthTokenResponse>.Success(token);
         }
     }
 }

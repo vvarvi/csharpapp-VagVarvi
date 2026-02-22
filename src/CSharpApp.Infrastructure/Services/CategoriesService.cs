@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace CSharpApp.Infrastructure.Services
 {
@@ -16,7 +17,7 @@ namespace CSharpApp.Infrastructure.Services
         public CategoriesService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-        }              
+        }
 
         public async Task<IReadOnlyCollection<Category>> GetCategories(CancellationToken cancellationToken)
         {
@@ -33,7 +34,7 @@ namespace CSharpApp.Infrastructure.Services
 
             return categories?.AsReadOnly() ?? new List<Category>().AsReadOnly();
         }
-             
+
         public async Task<Category> GetCategoryById(int id)
         {
             var response = await _httpClient.GetAsync($"categories/{id}");
@@ -48,9 +49,26 @@ namespace CSharpApp.Infrastructure.Services
             return await response.Content.ReadFromJsonAsync<Category>() ?? throw new Exception("Category not found");
         }
 
-        public Task<Category> CreateCategory(CreateCategoryRequest request)
+        public async Task<Category> CreateCategory(CreateCategoryRequest request)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync("categories");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+
+                throw new ExternalApiException((int)response.StatusCode, message);
+            }
+
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            var product = JsonSerializer.Deserialize<Category>(contentString);
+
+            return new Category
+            {
+                Name = request.Name,
+                Image = request.Image
+            };
         }
     }
 

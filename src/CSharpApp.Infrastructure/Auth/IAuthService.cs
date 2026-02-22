@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpApp.Core.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace CSharpApp.Infrastructure.Auth
 {
     public interface IAuthService
     {
-        Task<AuthTokenResponse> LoginAsync();
-        Task<AuthTokenResponse> RefreshAsync(string refreshToken);
+        Task<Result<AuthTokenResponse>> LoginAsync();
+        Task<Result<AuthTokenResponse>> RefreshAsync(string refreshToken);
     }
 }

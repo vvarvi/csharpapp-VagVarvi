@@ -1,4 +1,5 @@
 ﻿
+
 namespace CSharpApp.Core.Common
 {
     public class Result<T>
@@ -18,6 +19,6 @@ namespace CSharpApp.Core.Common
             => new(true, value, null);
 
         public static Result<T> Failure(Error error)
-            => new(false, default, error);
+            => new(false, default, error);        
     }
 }

@@ -1,4 +1,5 @@
-﻿using CSharpApp.Infrastructure.Security.Jwt;
+﻿using CSharpApp.Core.Common;
+using CSharpApp.Infrastructure.Security.Jwt;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -26,16 +27,29 @@ namespace CSharpApp.Infrastructure.Auth
         {
             if (_accessToken == null || DateTime.UtcNow >= _expiry)
             {
-                var auth = _refreshToken == null
+                //var auth = _refreshToken == null
+                //    ? await _authService.LoginAsync()
+                //    : await _authService.RefreshAsync(_refreshToken);
+
+                //_accessToken = auth.AccessToken;
+                //_refreshToken = auth.RefreshToken;
+
+                ////_expiry = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes); // or parse JWT exp
+                //_expiry = GetExpiryFromJwt(auth.AccessToken).AddSeconds(-_jwtOptions.ExpirationBufferSeconds);
+
+                Result<AuthTokenResponse> auth = _refreshToken == null
                     ? await _authService.LoginAsync()
                     : await _authService.RefreshAsync(_refreshToken);
 
-                _accessToken = auth.AccessToken;
-                _refreshToken = auth.RefreshToken;
+                if (auth.Value == null)
+                {
+                    throw new InvalidOperationException("Authentication failed: token response is null.");
+                }
 
-                //_expiry = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes); // or parse JWT exp
-                _expiry = GetExpiryFromJwt(auth.AccessToken).AddSeconds(-_jwtOptions.ExpirationBufferSeconds);
+                _accessToken = auth.Value.AccessToken;
+                _refreshToken = auth.Value.RefreshToken;
 
+                _expiry = GetExpiryFromJwt(_accessToken!).AddSeconds(-_jwtOptions.ExpirationBufferSeconds);
             }
 
             return _accessToken!;

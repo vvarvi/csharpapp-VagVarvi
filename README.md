@@ -23,7 +23,7 @@ Project Structure
 CSharpApp.Api            → Presentation (Minimal API)
 CSharpApp.Application    → Use cases (CQRS, handlers, interfaces)
 CSharpApp.Infrastructure → External integrations, HttpClient, Auth
-CSharpApp.Core           → Domain entities & shared abstractions
+CSharpApp.Core           → Domain entities & shared abstractions + Result<T>
 CSharpApp.Tests          → Unit & Integration tests
 
 Flow
